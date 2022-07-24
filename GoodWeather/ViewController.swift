@@ -70,16 +70,29 @@ class ViewController: UIViewController {
         
         let search = URLRequest.load(resource: resource)
             .observe(on: MainScheduler.instance)
-            .catchAndReturn(WeatherResult.empty)
+            .asDriver(onErrorJustReturn: WeatherResult.empty)
         
         search.map { "\($0.main.temp) ℉" }
-            .bind(to: self.temperatureLabel.rx.text)
+            .drive(self.temperatureLabel.rx.text)
             .disposed(by: disposeBag)
         
         search.map { "\($0.main.humidity) 💦" }
-            .bind(to: self.humidityLabel.rx.text)
+            .drive(self.humidityLabel.rx.text)
             .disposed(by: disposeBag)
         
+        
+//        let search = URLRequest.load(resource: resource)
+//            .observe(on: MainScheduler.instance)
+//            .catchAndReturn(WeatherResult.empty)
+        
+//        search.map { "\($0.main.temp) ℉" }
+//            .bind(to: self.temperatureLabel.rx.text)
+//            .disposed(by: disposeBag)
+//
+//        search.map { "\($0.main.humidity) 💦" }
+//            .bind(to: self.humidityLabel.rx.text)
+//            .disposed(by: disposeBag)
+//
     
 //        URLRequest.load(resource: resource)
 //            .observe(on: MainScheduler.instance)
