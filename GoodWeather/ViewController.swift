@@ -35,18 +35,6 @@ class ViewController: UIViewController {
                 
             }).disposed(by: disposeBag)
         
-//        self.cityNameTextField.rx.value
-//            .subscribe(onNext: { city in
-//
-//                if let city = city {
-//                    if city.isEmpty {
-//                        self.displayWeather(nil)
-//                    } else {
-//                        self.fetchWeather(by: city)
-//                    }
-//                }
-//
-//            }).disposed(by: disposeBag)
     }
     
     private func displayWeather(_ weather: Weather?) {
@@ -68,9 +56,17 @@ class ViewController: UIViewController {
         
         let resource = Resource<WeatherResult>(url: url)
         
+//        let search = URLRequest.load(resource: resource)
+//            .observe(on: MainScheduler.instance)
+//            .asDriver(onErrorJustReturn: WeatherResult.empty)
+        
         let search = URLRequest.load(resource: resource)
             .observe(on: MainScheduler.instance)
-            .asDriver(onErrorJustReturn: WeatherResult.empty)
+            .retry(3)
+            .catch { error in
+                print(error.localizedDescription)
+                return Observable.just(WeatherResult.empty)
+            }.asDriver(onErrorJustReturn: WeatherResult.empty)
         
         search.map { "\($0.main.temp) ℉" }
             .drive(self.temperatureLabel.rx.text)
@@ -79,28 +75,6 @@ class ViewController: UIViewController {
         search.map { "\($0.main.humidity) 💦" }
             .drive(self.humidityLabel.rx.text)
             .disposed(by: disposeBag)
-        
-        
-//        let search = URLRequest.load(resource: resource)
-//            .observe(on: MainScheduler.instance)
-//            .catchAndReturn(WeatherResult.empty)
-        
-//        search.map { "\($0.main.temp) ℉" }
-//            .bind(to: self.temperatureLabel.rx.text)
-//            .disposed(by: disposeBag)
-//
-//        search.map { "\($0.main.humidity) 💦" }
-//            .bind(to: self.humidityLabel.rx.text)
-//            .disposed(by: disposeBag)
-//
-    
-//        URLRequest.load(resource: resource)
-//            .observe(on: MainScheduler.instance)
-//            .catchAndReturn(WeatherResult.empty)
-//            .subscribe(onNext: { result in
-//                let weather = result.main
-//                self.displayWeather(weather)
-//            }).disposed(by: disposeBag)
     }
 
 }
