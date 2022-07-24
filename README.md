@@ -67,7 +67,8 @@ class ViewController: UIViewController {
 
 ----------------
 
-## ❌　キーボードが入力される度にリクエストが送られてしまい、サーバーに負荷がかかる(Contoroll Property)
+## ❌　Contoroll Property
+### キーボードが入力される度にリクエストが送られてしまい、サーバーに負荷がかかる
 ```swift
             self.cityNameTextField.rx.value
             .subscribe(onNext: { city in
@@ -83,7 +84,8 @@ class ViewController: UIViewController {
             }).disposed(by: disposeBag)
 ```
 
-## ⭕️　ユーザーが検索ボタンを押下時に、リクエストを送る(Contoroll Event)
+## ⭕️　Contoroll Event
+### ユーザーが検索ボタンを押下時に、リクエストを送る
 ```swift
             self.cityNameTextField.rx.controlEvent(.editingDidEndOnExit)
             .asObservable()
