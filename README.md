@@ -65,7 +65,10 @@ class ViewController: UIViewController {
 
 ```
 
-## ❌　キーボードが入力される度にリクエストが送られてしまい、サーバーに負荷がかかる
+----------------
+
+## ❌　Contoroll Property
+### キーボードが入力される度にリクエストが送られてしまい、サーバーに負荷がかかる
 ```swift
             self.cityNameTextField.rx.value
             .subscribe(onNext: { city in
@@ -81,7 +84,8 @@ class ViewController: UIViewController {
             }).disposed(by: disposeBag)
 ```
 
-## ⭕️　ユーザーが検索ボタンを押下時に、リクエストを送る
+## ⭕️　Contoroll Event
+### ユーザーが検索ボタンを押下時に、リクエストを送る
 ```swift
             self.cityNameTextField.rx.controlEvent(.editingDidEndOnExit)
             .asObservable()
@@ -97,4 +101,69 @@ class ViewController: UIViewController {
                 }
                 
             }).disposed(by: disposeBag)
+```
+
+
+---------
+
+## ❌ Binding使わない実装
+```swift
+
+    private func fetchWeather(by city: String) {
+        guard let cityEncoded = city.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed),
+              let url = URL.urlForWeatherAPI(city: cityEncoded) else {
+            return
+        }
+        
+        let resource = Resource<WeatherResult>(url: url)   
+        URLRequest.load(resource: resource)
+            .observe(on: MainScheduler.instance)
+            .catchAndReturn(WeatherResult.empty)
+            .subscribe(onNext: { result in
+                let weather = result.main
+                self.displayWeather(weather)
+            }).disposed(by: disposeBag)
+    }
+
+    private func displayWeather(_ weather: Weather?) {
+        
+        if let weather = weather {
+            self.temperatureLabel.text = "\(weather.temp) ℉"
+            self.humidityLabel.text = "\(weather.humidity) 💦"
+        } else {
+            self.temperatureLabel.text = "🙈"
+            self.humidityLabel.text = "⚉"
+        }
+    }
+    
+```
+
+## ⭕️ Bindingで実装
+```swift
+    private func displayWeather(_ weather: Weather?) {
+        
+        if let weather = weather {
+            self.temperatureLabel.text = "\(weather.temp) ℉"
+            self.humidityLabel.text = "\(weather.humidity) 💦"
+        } else {
+            self.temperatureLabel.text = "🙈"
+            self.humidityLabel.text = "⚉"
+        }
+    }
+    
+    private func fetchWeather(by city: String) {
+        guard let cityEncoded = city.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed),
+              let url = URL.urlForWeatherAPI(city: cityEncoded) else {
+            return
+        }
+        
+        let resource = Resource<WeatherResult>(url: url)
+        URLRequest.load(resource: resource)
+            .observe(on: MainScheduler.instance)
+            .catchAndReturn(WeatherResult.empty)
+            .subscribe(onNext: { result in
+                let weather = result.main
+                self.displayWeather(weather)
+            }).disposed(by: disposeBag)
+    }
 ```
